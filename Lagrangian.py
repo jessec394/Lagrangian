@@ -110,14 +110,19 @@ L = T - V
 # Equations of Motion
 EOM = []
 
-# Remove LaTeX Junk
+# Format LaTeX Expressions
 def Format(Expression):
+    # Remove Junk
     LatexString = sp.latex(sp.simplify(Expression))                         # Simplify Expression                           [2x/4 -> x/2]
     LatexString = LatexString.replace(r'{\left(t \right)}', '')             # Eliminate Function Notation                   [x(t) -> x]
     LatexString = LatexString.replace(r'1.0', '')                           # Remove 1.0 Coefficient                        [1.0x -> x]
     LatexString = LatexString.replace(r'\cdot', '')                         # Remove Multiplication Dot                     [x·y -> xy]
     LatexString = LatexString.replace(r'\frac{d}{d t}', r'\dot')            # Replace 1st Time Derivative with Single Dot   [dx/dt -> x_dot]
     LatexString = LatexString.replace(r'\frac{d^{2}}{d t^{2}}', r'\ddot')   # Replace 2nd Time Derivative with Double Dot   [d^2x/dt^2 -> x_ddot]
+
+    # Fix Parentheses
+    LatexString = LatexString.replace(r' (', ' \left(')
+    LatexString = LatexString.replace(r' )', ' \right)')
 
     # Replace Generalized Coordinates with Variable Names
     for i in range(len(Variables)):
