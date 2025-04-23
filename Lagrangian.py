@@ -1,28 +1,53 @@
+'''  Script to solve the equations of motion for an any-DOF system of generalized coordinates  '''
+'''  Jesse Cook (2025) '''
+
+# Usage Instructions
+'''
+1.) Define symbolic constants in the "Constants" list
+    eg. 'g' or 'L' representing static quantities with no time derivative
+
+2.) Define symbolic variables in the "Variables" list
+    eg. 'x' or 'theta' representing functions of time
+
+3.) Define energy expressions in the "KineticEnergy" and "PotentialEnergy" lists
+    Resolve all expressions in an inertial reference frame
+    Use "_dot" and "_ddot" to represent first and second time derivatives of defined variables
+'''
+
 # Libraries
 import matplotlib.pyplot as plt
 from matplotlib.offsetbox import AnchoredText
 import os
-import pygame
-import pygame_gui
 import sympy as sp
 
 # Project Directory
 Directory = os.path.abspath(os.path.dirname(__file__))
-SavePath = os.path.join(Directory, "Magic.png")
+SavePath = os.path.join(Directory, "Output.png")
 
+''' --------------- '''
 ''' BEGIN USER INPUT'''
+''' --------------- '''
 
-# Constants
-Constants = ['g', 'L_1', 'L_2', 'm_1', 'm_2']
+# Constant Terms
+Constants = [
+    'g',
+    'L_1',
+    'L_2',
+    'm_1',
+    'm_2'
+]
 
-# Variables
-Variables = ['theta', 'phi']
+# Variable Terms
+Variables = [
+    'theta',
+    'phi'
+]
 
-# Potential Energy Expressions
+# Kinetic Energy Expressions
 KineticEnergy = [
-    '(0.5 * m_1 * L_1**2 * theta_dot**2)',
-    '(0.5 * m_2 * L_1**2 * theta_dot**2)',
-    '(0.5 * m_2 * L_2**2 * phi_dot**2)',
+    '(0.5 * m_1 * L_1^2 * theta_dot**2)',
+    '(0.5 * m_2 * L_1^2 * theta_dot**2)',
+    '(0.5 * m_2 * L_2^2 * phi_dot**2)',
     '(m_2 * L_1 * L_2 * theta_dot * phi_dot * cos(theta - phi))'
 ]
 
@@ -33,7 +58,9 @@ PotentialEnergy = [
     '(-m_2 * g * L_2 * cos(phi))'
 ]
 
+''' ------------- '''
 ''' END USER INPUT'''
+''' ------------- '''
 
 # Time
 t = sp.symbols('t')
@@ -85,14 +112,14 @@ EOM = []
 
 # Remove LaTeX Junk
 def Format(Expression):
-    LatexString = sp.latex(sp.simplify(Expression))                         # Simplify expression
-    LatexString = LatexString.replace(r'{\left(t \right)}', '')             # Eliminate function notation (t)
-    LatexString = LatexString.replace(r'1.0', '')                           # Remove 1.0 coefficient
-    LatexString = LatexString.replace(r'\cdot', '')                         # Remove multiplication dot
-    LatexString = LatexString.replace(r'\frac{d}{d t}', r'\dot')            # Replace first time derivative with dot
-    LatexString = LatexString.replace(r'\frac{d^{2}}{d t^{2}}', r'\ddot')   # Replace second time derivative with double dot
+    LatexString = sp.latex(sp.simplify(Expression))                         # Simplify Expression                           [2x/4 -> x/2]
+    LatexString = LatexString.replace(r'{\left(t \right)}', '')             # Eliminate Function Notation                   [x(t) -> x]
+    LatexString = LatexString.replace(r'1.0', '')                           # Remove 1.0 Coefficient                        [1.0x -> x]
+    LatexString = LatexString.replace(r'\cdot', '')                         # Remove Multiplication Dot                     [x·y -> xy]
+    LatexString = LatexString.replace(r'\frac{d}{d t}', r'\dot')            # Replace 1st Time Derivative with Single Dot   [dx/dt -> x_dot]
+    LatexString = LatexString.replace(r'\frac{d^{2}}{d t^{2}}', r'\ddot')   # Replace 2nd Time Derivative with Double Dot   [d^2x/dt^2 -> x_ddot]
 
-    # Replace generalized coordinates with variable names
+    # Replace Generalized Coordinates with Variable Names
     for i in range(len(Variables)):
         VariableString = str(Variables[i])
         LatexString = LatexString.replace(f'q_{{{i+1}}}', VariableString)
@@ -144,15 +171,15 @@ Text += f'\t' + r'$\mathcal{{L}} = \mathcal{{T}} - \mathcal{{V}} = $' + f'${Form
 
 Text += Divider()
 
-# For each generalized coordinate:
+# For Each Generalized Coordinate:
 for i in range(len(Variables)):
-    # GC as a function of time
+    # GC as a Function of Time
     qi = q[i](t)
 
-    # First time derivative
+    # First Time Derivative
     qi_dot = q_dot[i]
 
-    # Second time derivative
+    # Second Time Derivative
     qi_ddot = q_ddot[i]
 
     # (1) Partial L / Partial q_dot
@@ -196,7 +223,5 @@ ax.add_artist(Textbox)
 plt.savefig(SavePath, bbox_inches="tight", dpi=300, transparent=True)
 
 # Open Figure
-if os.name == "posix":
-    os.system(f'xdg-open "{SavePath}"')
-elif os.name == "nt":
-    os.system(f'start "" "{SavePath}"')
+if os.name == "posix": os.system(f'xdg-open "{SavePath}"')
+elif os.name == "nt": os.system(f'start "" "{SavePath}"')
